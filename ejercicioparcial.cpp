@@ -1,58 +1,65 @@
+#include <cmath>
 #include <iostream>
-
-/*
-Un laboratorio de robótica está realizando pruebas con un robot autónomo que debe desplazarse dentro de una zona de investigación.
-Durante una prueba, el robot registra diferentes puntos de su trayectoria.
-Cada punto contiene una posición en los ejes X, Y y Z, además de información
-relacionada con el movimiento realizado en ese punto.
-El programa deberá almacenar los puntos de trayectoria, procesarlos matemáticamente
-y determinar aspectos como la distancia recorrida, el punto más alejado del origen y posibles cambios en la trayectoria.
-El objetivo es utilizar estructuras, arreglos, funciones, referencias y punteros
-para construir un pequeño sistema de análisis de trayectoria.
-El programa trabajará con un máximo de 10 puntos.
-*/
+#include <limits>
+#include <string>
 
 struct PuntoTrayectoria
 {
     std::string identificador;
     std::string nombre;
-    std::string coordenadas[3];
-    float distanciaOrigen;
-    float factorUtilizacion;
+    float coordenadas[3]{};
+    float distanciaOrigen = 0;
     std::string estadoSeguridad;
 };
 
 void registrarPunto(PuntoTrayectoria &punto)
 {
-
     std::cout << "Identificador: ";
     std::getline(std::cin >> std::ws, punto.identificador);
 
     std::cout << "Nombre: ";
     std::getline(std::cin, punto.nombre);
 
+    const char ejes[3] = {'X', 'Y', 'Z'};
+
     for (int i = 0; i < 3; i++)
     {
-        std::cout << "Coordenadas " << i + 1 << ": ";
-        std::cin >> punto.coordenadas[i];
+        while (true)
+        {
+            std::cout << "Coordenada " << ejes[i] << ": ";
+
+            if (std::cin >> punto.coordenadas[i])
+            {
+                break;
+            }
+
+            if (std::cin.eof())
+            {
+                return;
+            }
+
+            std::cin.clear();
+            std::cin.ignore(
+                std::numeric_limits<std::streamsize>::max(), '\n');
+
+            std::cout << "Entrada invalida. Ingresa un numero.\n";
+        }
     }
 }
 
 float calcularDistancia(PuntoTrayectoria *punto)
 {
-    float raiz = 0;
+    float x = punto->coordenadas[0];
+    float y = punto->coordenadas[1];
+    float z = punto->coordenadas[2];
 
-    std::cout << "Su distancia al origen es: " << std::endl;
-    for (int i = 0; i < 3; i++)
-    {
+    punto->distanciaOrigen = std::sqrt(x * x + y * y + z * z);
 
-        (*punto).coordenadas[i];
-    }
+    return punto->distanciaOrigen;
 }
 
 void clasificarPunto(PuntoTrayectoria &punto)
 {
-
     if (punto.distanciaOrigen <= 5)
     {
         punto.estadoSeguridad = "CERCANO";
@@ -71,93 +78,120 @@ void clasificarPunto(PuntoTrayectoria &punto)
     }
 }
 
-PuntoTrayectoria *obtenerPuntoMasAlejado(PuntoTrayectoria puntos[], int cantidad)
+PuntoTrayectoria *obtenerPuntoMasAlejado(
+    PuntoTrayectoria puntos[], int cantidad)
 {
-
-    PuntoTrayectoria *critico = &puntos[0];
-
-    for (int i = 1; i < cantidad; i++)
+    if (cantidad <= 0)
     {
-        if (puntos[i].distanciaOrigen >
-            (*critico).distanciaOrigen) // Es este el mayor de todos?
+        return nullptr;
+    }
+
+    PuntoTrayectoria *mas_alejado = puntos;
+
+    for (PuntoTrayectoria *actual = puntos + 1;
+         actual < puntos + cantidad;
+         actual++)
+    {
+        if (actual->distanciaOrigen > mas_alejado->distanciaOrigen)
         {
-            critico = &puntos[i]; // Entonces esta es la mayor distancia
+            mas_alejado = actual;
         }
     }
 
-    return critico;
+    return mas_alejado;
 }
 
 int main()
 {
-    const int MAX_ELEMENTOS = 10;
+    const int kMaxElementos = 10;
 
-    PuntoTrayectoria trayectoria[MAX_ELEMENTOS]{};
+    PuntoTrayectoria trayectoria[kMaxElementos]{};
     int cantidad = 0;
+
     while (true)
     {
-        std::cout << "Cuantos elementos deseas registrar? (1 a 10): ";
+        std::cout << "Cuantos puntos deseas registrar? (1 a 10): ";
 
         if (std::cin >> cantidad)
         {
-            if (cantidad >= 1 && cantidad <= MAX_ELEMENTOS)
+            if (cantidad >= 1 && cantidad <= kMaxElementos)
             {
                 break;
             }
         }
         else
         {
+            if (std::cin.eof())
+            {
+                return 0;
+            }
 
             std::cin.clear();
         }
 
+        std::cin.ignore(
+            std::numeric_limits<std::streamsize>::max(), '\n');
+
         std::cout << "Cantidad invalida. Intenta nuevamente.\n";
     }
 
-    std::cout << "Se registrara " << cantidad
-              << " puntos." << std::endl;
+    std::cout << "\nSe registraran " << cantidad << " puntos.\n";
 
-    //------------------------------------------------------------------------------
-
+    // Registrar los puntos mediante la funcion.
     for (int i = 0; i < cantidad; i++)
     {
-
+        std::cout << "\nPUNTO " << i + 1 << '\n';
         registrarPunto(trayectoria[i]);
-    }
-    //--------------------------------------------------------------------------
 
-    for (PuntoTrayectoria *p = trayectoria; p < trayectoria + cantidad; p++) // Avanza el puntero una estructura Elemento completa, para apuntar a la siguiente.
+        if (!std::cin)
+        {
+            return 0;
+        }
+    }
+
+    // Recorrer el arreglo utilizando punteros.
+    for (PuntoTrayectoria *p = trayectoria;
+         p < trayectoria + cantidad;
+         p++)
     {
-        float factor = calcularDistancia(p);
-        float calcularDistancia(PuntoTrayectoria * punto);
+        calcularDistancia(p);
+        clasificarPunto(*p);
     }
 
-    //-------------------------------------------------------
+    // Mostrar la distancia y clasificacion de cada punto.
+    std::cout << "\nRESULTADOS\n";
 
-    PuntoTrayectoria *encontrado = obtenerPuntoMasAlejado(trayectoria, cantidad);
-
-    std::cout << "\nELEMENTO MAS ALEJADO\n";
-
-    std::cout << "ID: "
-              << (*encontrado).identificador << std::endl;
-
-    std::cout << "Nombre: "
-              << (*encontrado).nombre << std::endl;
-
-    for (int i = 0; i < 3; i++)
+    for (PuntoTrayectoria *p = trayectoria;
+         p < trayectoria + cantidad;
+         p++)
     {
-        std::cout << "Coordenadas " << i + 1 << ": "
-                  << (*encontrado).coordenadas[i] << std::endl;
+        std::cout << "\nID: " << p->identificador << '\n';
+        std::cout << "Nombre: " << p->nombre << '\n';
+        std::cout << "Distancia al origen: "
+                  << p->distanciaOrigen << '\n';
+        std::cout << "Clasificacion: "
+                  << p->estadoSeguridad << '\n';
     }
 
-    std::cout << "Estado de seguridad: "
-              << (*encontrado).estadoSeguridad << std::endl;
+    PuntoTrayectoria *encontrado =
+        obtenerPuntoMasAlejado(trayectoria, cantidad);
 
-    //--------------------------------------------------------
+    if (encontrado != nullptr)
+    {
+        std::cout << "\nPUNTO MAS ALEJADO\n";
+        std::cout << "ID: " << encontrado->identificador << '\n';
+        std::cout << "Nombre: " << encontrado->nombre << '\n';
 
-    
+        std::cout << "X: " << encontrado->coordenadas[0] << '\n';
+        std::cout << "Y: " << encontrado->coordenadas[1] << '\n';
+        std::cout << "Z: " << encontrado->coordenadas[2] << '\n';
 
+        std::cout << "Distancia al origen: "
+                  << encontrado->distanciaOrigen << '\n';
 
+        std::cout << "Clasificacion: "
+                  << encontrado->estadoSeguridad << '\n';
+    }
 
     return 0;
 }
