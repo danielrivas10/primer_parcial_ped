@@ -79,18 +79,40 @@ void clasificarPunto(PuntoTrayectoria &punto)
     }
 }
 
-void corregirCoordenadas(
-    PuntoTrayectoria &punto,
-    float desplazamientoX,
-    float desplazamientoY,
-    float desplazamientoZ)
+PuntoTrayectoria *obtenerPuntoMasAlejado(PuntoTrayectoria puntos[], int cantidad)
 {
-    punto.coordenadas[0] += desplazamientoX;
-    punto.coordenadas[1] += desplazamientoY;
+    if (cantidad <= 0)
+    {
+        return nullptr; // O sea si no existe ningun valor.
+    }
+
+    PuntoTrayectoria *mas_alejado = puntos; // Primer punto es el más alejado.
+
+    for (PuntoTrayectoria *actual = puntos + 1;  
+         actual < puntos + cantidad;  // ¿actual todavía está antes del final del arreglo?» // Cantidad son los puntos que agregamos y así va evaluando.
+         actual++)
+    {
+        if (actual->distanciaOrigen > mas_alejado->distanciaOrigen) //En la primera ronda actual aumentaria a la posición dos, entonces accede
+        // a la distancia origen guardada de esa posición y compara.
+        {
+            mas_alejado = actual;
+        }
+    }
+
+    return mas_alejado;
+}
+
+
+
+void corregirCoordenadas(PuntoTrayectoria &punto, float desplazamientoX,float desplazamientoY,  float desplazamientoZ)
+{
+    punto.coordenadas[0] += desplazamientoX; // Lo que hace es sumar coordenadas de cada una con los desplazamientos, bien puede ser 10+5 y así.
+    punto.coordenadas[1] += desplazamientoY; //Acá se aplican los valores de main.
     punto.coordenadas[2] += desplazamientoZ;
 
-    calcularDistancia(&punto);
-    clasificarPunto(punto);
+    calcularDistancia(&punto); // Lo que hace el & es darle el valor original para volver a actualizarlo con nuevos valores.
+    // 
+    clasificarPunto(punto); //Ya está siendo llamado con amperson desde el inicio.
 
     std::cout << "\nPUNTO CORREGIDO\n";
     std::cout << "ID: " << punto.identificador << '\n';
@@ -103,6 +125,7 @@ void corregirCoordenadas(
     std::cout << "Clasificacion: "
               << punto.estadoSeguridad << '\n';
 }
+
 
 void generarInforme(PuntoTrayectoria puntos[], int cantidad)
 {
@@ -119,22 +142,28 @@ void generarInforme(PuntoTrayectoria puntos[], int cantidad)
     double suma_distancias = 0;
 
     // Guardar el formato actual de la salida.
-    const auto formato_anterior = std::cout.flags();
+    const auto formato_anterior = std::cout.flags(); // Estas líneas guardan la configuración actual de cómo se imprimen los datos, 
+    // para recuperarla al terminar. auto hace que C++ deduzca el tipo de esas variables.
     const auto precision_anterior = std::cout.precision();
 
-    std::cout << std::fixed << std::setprecision(2);
+    std::cout << std::fixed << std::setprecision(2); // Hace que los números decimales aparezcan con dos cifras después del punto, por ejemplo 12.50. Solo cambia cómo se muestran.
     std::cout << "\nINFORME DE TRAYECTORIA\n\n";
 
     std::cout << std::left
               << std::setw(15) << "ID"
               << std::setw(25) << "Nombre"
-              << std::setw(12) << "X"
+              << std::setw(12) << "X"     
               << std::setw(12) << "Y"
               << std::setw(12) << "Z"
               << std::setw(15) << "Distancia"
               << "Clasificacion\n";
+  /*
+ std::left: alinea el contenido a la izquierda.
+std::setw(15): reserva un ancho mínimo de 15 caracteres para el siguiente dato.
+std::setw(25): reserva 25 para el siguiente
+ */
 
-    std::cout << std::string(105, '-') << '\n';
+    std::cout << std::string(105, '-') << '\n'; // Esa línea imprime 105 guiones seguidos y luego pasa a la siguiente línea.
 
     for (PuntoTrayectoria *p = puntos;
          p < puntos + cantidad;
@@ -182,30 +211,6 @@ void generarInforme(PuntoTrayectoria puntos[], int cantidad)
     std::cout.precision(precision_anterior);
 }
 
-
-PuntoTrayectoria *obtenerPuntoMasAlejado(PuntoTrayectoria puntos[], int cantidad)
-{
-    if (cantidad <= 0)
-    {
-        return nullptr; // O sea si no existe ningun valor.
-    }
-
-    PuntoTrayectoria *mas_alejado = puntos;
-
-    for (PuntoTrayectoria *actual = puntos + 1;
-         actual < puntos + cantidad;
-         actual++)
-    {
-        if (actual->distanciaOrigen > mas_alejado->distanciaOrigen)
-        {
-            mas_alejado = actual;
-        }
-    }
-
-    return mas_alejado;
-}
-
-
 int main()
 {
     const int kMaxElementos = 10;
@@ -242,6 +247,10 @@ int main()
 
     std::cout << "\nSe registraran " << cantidad << " puntos.\n";
 
+
+    //-------------------------------------------------------------------------------
+
+
     // Registrar los puntos mediante la funcion.
     for (int i = 0; i < cantidad; i++)
     {
@@ -253,6 +262,8 @@ int main()
             return 0;
         }
     }
+
+    //-------------------------------------------------------------------------------
 
     // Recorrer el arreglo utilizando punteros.
     for (PuntoTrayectoria *p = trayectoria; // p apunta a trayectoria[0]
@@ -266,6 +277,8 @@ int main()
     // Mostrar la distancia y clasificacion de cada punto.
     std::cout << "\nRESULTADOS\n";
 
+//--------------------------------------------------------------------------------------------------
+
     for (PuntoTrayectoria *p = trayectoria;
          p < trayectoria + cantidad;
          p++)
@@ -276,12 +289,12 @@ int main()
                   << p->distanciaOrigen << '\n';
         std::cout << "Clasificacion: "
                   << p->estadoSeguridad << '\n';
-    }
+    } //Para enseñar los datos.
 
     PuntoTrayectoria *encontrado =
-        obtenerPuntoMasAlejado(trayectoria, cantidad);
+        obtenerPuntoMasAlejado(trayectoria, cantidad); //
 
-    if (encontrado != nullptr)
+    if (encontrado != nullptr) // Si no hay vacio
     {
         std::cout << "\nPUNTO MAS ALEJADO\n";
         std::cout << "ID: " << encontrado->identificador << '\n';
@@ -298,7 +311,7 @@ int main()
                   << encontrado->estadoSeguridad << '\n';
     }
 
-
+//--------------------------------------------------------------------------------------------------
 
 
 int opcion = -1;
@@ -395,7 +408,7 @@ do
 
             corregirCoordenadas(
                 trayectoria[seleccion - 1],
-                desplazamientos[0],
+                desplazamientos[0],   //Estos valores solo son aplicados en void.
                 desplazamientos[1],
                 desplazamientos[2]);
 
