@@ -21,7 +21,7 @@ void registrarPunto(PuntoTrayectoria &punto)
     std::cout << "Nombre: ";
     std::getline(std::cin, punto.nombre);
 
-    const char ejes[3] = {'X', 'Y', 'Z'};
+    const char ejes[3] = {'X', 'Y', 'Z'}; //Esto es para declarar lo que tendrá coordenadas.
 
     for (int i = 0; i < 3; i++)
     {
@@ -29,34 +29,34 @@ void registrarPunto(PuntoTrayectoria &punto)
         {
             std::cout << "Coordenada " << ejes[i] << ": ";
 
-            if (std::cin >> punto.coordenadas[i])
+            if (std::cin >> punto.coordenadas[i]) // Quiere decir que mientras se ponga numeros, porque o sea es una función float.
             {
                 break;
             }
 
-            if (std::cin.eof())
+            if (std::cin.eof()) // Si ya se terminaron de leer datos.
             {
                 return;
             }
 
-            std::cin.clear();
-            std::cin.ignore(
-                std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cin.clear(); // Si hay error hace qque se pueda leer otra vez.
+            std::cin.ignore( // Descarta texto incorrecto para escribir el nuevo
+                std::numeric_limits<std::streamsize>::max(), '\n'); 
 
-            std::cout << "Entrada invalida. Ingresa un numero.\n";
+            std::cout << "Entrada invalida. Ingresa un numero.\n"; //Dentro del whiile.
         }
     }
 }
 
-float calcularDistancia(PuntoTrayectoria *punto)
+float calcularDistancia(PuntoTrayectoria *punto) // Punto hace que accedas a lo que está dentro de PuntoTrayectoria.
 {
     float x = punto->coordenadas[0];
-    float y = punto->coordenadas[1];
+    float y = punto->coordenadas[1]; //Asigna el valor.
     float z = punto->coordenadas[2];
 
     punto->distanciaOrigen = std::sqrt(x * x + y * y + z * z);
 
-    return punto->distanciaOrigen;
+    return punto->distanciaOrigen; // Solo regresa lo que se pide.
 }
 
 void clasificarPunto(PuntoTrayectoria &punto)
@@ -67,7 +67,7 @@ void clasificarPunto(PuntoTrayectoria &punto)
     }
     else if (punto.distanciaOrigen <= 10)
     {
-        punto.estadoSeguridad = "INTERMEDIO";
+        punto.estadoSeguridad = "INTERMEDIO"; //Solo asigna rangos.
     }
     else if (punto.distanciaOrigen <= 20)
     {
@@ -183,12 +183,11 @@ void generarInforme(PuntoTrayectoria puntos[], int cantidad)
 }
 
 
-PuntoTrayectoria *obtenerPuntoMasAlejado(
-    PuntoTrayectoria puntos[], int cantidad)
+PuntoTrayectoria *obtenerPuntoMasAlejado(PuntoTrayectoria puntos[], int cantidad)
 {
     if (cantidad <= 0)
     {
-        return nullptr;
+        return nullptr; // O sea si no existe ningun valor.
     }
 
     PuntoTrayectoria *mas_alejado = puntos;
@@ -256,12 +255,12 @@ int main()
     }
 
     // Recorrer el arreglo utilizando punteros.
-    for (PuntoTrayectoria *p = trayectoria;
-         p < trayectoria + cantidad;
-         p++)
+    for (PuntoTrayectoria *p = trayectoria; // p apunta a trayectoria[0]
+         p < trayectoria + cantidad; // Lo unico que hace es que segun los datos que registraste, asi va evaluando para mostrarlos.
+         p++) 
     {
-        calcularDistancia(p);
-        clasificarPunto(*p);
+        calcularDistancia(p); // la dirección donde está el punto. Le colocas una p porque ese es el dato que envias al void.
+        clasificarPunto(*p); // Obtiene TODA la estructura de donde apunta ese punto.
     }
 
     // Mostrar la distancia y clasificacion de cada punto.
@@ -426,3 +425,4 @@ do
 
     return 0;
 }
+
